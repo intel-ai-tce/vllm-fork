@@ -1,6 +1,13 @@
+x-sets:
+  vllm_server_cpu: &vllm_server_cpu
+    cpuset: "${VLLM_CPU_CORES:-0-2,24-26,48-50,72-74,96-98,120-122}"
+    cpus:   "${VLLM_NUM_CPUS:-18.0}"
+
+
 services:
   vllm-server:
     image: ${DOCKER_IMAGE}
+    <<: *vllm_server_cpu
     environment:
       - MODEL
       - HF_HOME=/mnt/hf_cache
