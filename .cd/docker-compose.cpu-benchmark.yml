@@ -1,0 +1,31 @@
+x-sets:
+  vllm_ci_test_cpu: &vllm_ci_test_cpu
+    cpuset: "${VLLM_CPU_CORES:-3-23,27-47,51-71,75-95,99-119,123-143}"
+    cpus:   "${VLLM_NUM_CPUS:-126.0}"
+
+services:
+  vllm-ci-test:
+    <<: *vllm_ci_test_cpu
+    image: public.ecr.aws/q9t5s3a7/vllm-ci-test-repo:1da94e673c257373280026f75ceb4effac80e892-cpu
+    container_name: vllm-ci-test-cpu
+    depends_on:
+      vllm-server:
+        condition: service_healthy
+    volumes:
+      #- "${MODEL_CACHE:-./data}:/root/.cache/huggingface/hub"
+      - /mnt/hf_cache:/mnt/hf_cache
+      - "./tests/serving-tests-cpu.json:/workspace/.buildkite/nightly-benchmarks/tests/serving-tests-cpu.json:ro"
+    shm_size: 128g
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      HF_TOKEN: ${HF_TOKEN}
+      VLLM_CPU_KVCACHE_SPACE: 40
+      ON_CPU: 1
+      #SERVING_JSON: 
+    command: ["/workspace/.buildkite/nightly-benchmarks/scripts/run-performance-benchmarks.sh"]
+  benchmark:
+    environment:
+      - NUM_PROMPTS: 6400
+
