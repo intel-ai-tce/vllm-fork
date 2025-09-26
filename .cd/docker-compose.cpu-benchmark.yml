@@ -15,6 +15,7 @@ services:
       #- "${MODEL_CACHE:-./data}:/root/.cache/huggingface/hub"
       - /mnt/hf_cache:/mnt/hf_cache
       - "./tests/serving-tests-cpu.json:/workspace/.buildkite/nightly-benchmarks/tests/serving-tests-cpu.json:ro"
+      - "./results:/workspace/benchmarks/results"
     shm_size: 128g
     environment:
       no_proxy: ${no_proxy}
