@@ -24,9 +24,9 @@ services:
       HF_TOKEN: ${HF_TOKEN}
       VLLM_CPU_KVCACHE_SPACE: 40
       ON_CPU: 1
-      SERVING_JSON: serving-tests-cpu-snc3.json
+        #SERVING_JSON: serving-tests-cpu-snc3.json
     command: ["/workspace/.buildkite/nightly-benchmarks/scripts/run-performance-benchmarks.sh"]
   benchmark:
     environment:
-      NUM_PROMPTS: 12800
+      NUM_PROMPTS: 6400
 
