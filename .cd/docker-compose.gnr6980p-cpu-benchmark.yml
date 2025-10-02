@@ -6,7 +6,8 @@ x-sets:
 services:
   vllm-ci-test:
     <<: *vllm_ci_test_cpu
-    image: public.ecr.aws/q9t5s3a7/vllm-ci-test-repo:1da94e673c257373280026f75ceb4effac80e892-cpu
+    #image: public.ecr.aws/q9t5s3a7/vllm-ci-test-repo:1da94e673c257373280026f75ceb4effac80e892-cpu
+    image: public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:v0.10.1
     container_name: vllm-ci-test-cpu
     depends_on:
       vllm-server:
@@ -14,8 +15,10 @@ services:
     volumes:
       #- "${MODEL_CACHE:-./data}:/root/.cache/huggingface/hub"
       - /mnt/hf_cache:/mnt/hf_cache
-      - "./tests/serving-tests-cpu.json:/workspace/.buildkite/nightly-benchmarks/tests/serving-tests-cpu.json:ro"
-      - "./results:/workspace/benchmarks/results"
+      - "${VLLM_FOLDER_PATH:-./vllm}/.buildkite:/workspace/.buildkite"
+      - "${VLLM_FOLDER_PATH:-./vllm}/benchmarks:/workspace/benchmarks"
+      #- "./tests/serving-tests-cpu.json:/workspace/.buildkite/nightly-benchmarks/tests/serving-tests-cpu.json:ro"
+      #- "./results:/workspace/benchmarks/results"
     shm_size: 128g
     environment:
       no_proxy: ${no_proxy}
