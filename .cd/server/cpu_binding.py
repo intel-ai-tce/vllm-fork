@@ -8,10 +8,10 @@ class CPU_Binding():
     def __init__(self,
                  world_size: int,
                  rank: int,
-                 num_reserved_cpu: int):
+                 num_allocated_cpu: int):
         self.world_size = world_size
         self.rank = rank
-        self.num_reserved_cpu = num_reserved_cpu
+        self.num_allocated_cpu = num_allocated_cpu
     def get_cpus_id_binding_based_on_numa_nodes(self) -> str:
         """Return CPUs id binding based on NUMA nodes.
         """
@@ -27,8 +27,8 @@ class CPU_Binding():
             cpus_allow_list = psutil.Process().cpu_affinity()
             numa_size = info.get_num_configured_nodes()
             cpu_count_per_numa = cpu_count // numa_size
-            num_of_reserved_cpu = min(num_reserved_cpu,
-                                      cpu_count_per_numa // 2)
+            #num_of_reserved_cpu = min(num_reserved_cpu,
+            #                          cpu_count_per_numa // 2)
 
             # check allow node_to_cpus list
             node_to_cpus = []
@@ -46,10 +46,10 @@ class CPU_Binding():
                     "Please try to bind threads manually.", world_size,
                     len(node_to_cpus))
             else:
-                end = cpu_count_per_numa - num_of_reserved_cpu
-                rank_to_cpus_list = node_to_cpus[self.rank][:end]
+                start = cpu_count_per_numa - self.num_allocated_cpu
+                rank_to_cpus_list = node_to_cpus[self.rank][start:cpu_count_per_numa]
                 rank_to_cpus = ','.join(str(x) for x in rank_to_cpus_list)
-                print("auto thread-binding list: %s", rank_to_cpus)
+                print("rank %d auto thread-binding list: %s", self.rank, rank_to_cpus)
         else:
             print(
                 "Auto thread-binding is not supported due to "
@@ -59,9 +59,9 @@ class CPU_Binding():
         return rank_to_cpus
 
 if __name__=="__main__":
-    rank = 0
-    num_reserved_cpu = 2
-    world_size = 1
-    cpu_binder = CPU_Binding(world_size, rank, num_reserved_cpu)
-    rank_to_cpus = cpu_binder.get_cpus_id_binding_based_on_numa_nodes()
-    print(rank_to_cpus)
+    num_allocated_cpu = 2
+    world_size = 2
+    for i in range(world_size):
+        cpu_binder = CPU_Binding(world_size, i, num_allocated_cpu)
+        rank_to_cpus = cpu_binder.get_cpus_id_binding_based_on_numa_nodes()
+        print(rank_to_cpus)
