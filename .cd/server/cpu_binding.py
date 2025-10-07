@@ -61,8 +61,13 @@ class CPU_Binding():
 
 if __name__=="__main__":
     num_allocated_cpu = 18
-    world_size = 2
-    for i in range(world_size):
-        cpu_binder = CPU_Binding(world_size, i, num_allocated_cpu)
+    libnuma_found = util.find_spec("numa") is not None
+    if libnuma_found:
+        from numa import info
+        numa_size = info.get_num_configured_nodes()
+    else:
+        numa_size = 1
+    for i in range(numa_size):
+        cpu_binder = CPU_Binding(numa_size, i, num_allocated_cpu)
         rank_to_cpus = cpu_binder.get_cpus_id_binding_based_on_numa_nodes()
         print(rank_to_cpus)

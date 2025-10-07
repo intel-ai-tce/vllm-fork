@@ -10,6 +10,7 @@ from ruamel.yaml.comments import CommentedMap
 
 # Import CPU_Binding directly from sibling cpu_binding.py
 from cpu_binding import CPU_Binding
+from importlib import util
 
 SERVICE_NAME = "vllm-server"     # single service
 XSET_NAME    = "vllm_server_cpu" # x-sets key/anchor
@@ -69,9 +70,15 @@ def main():
     world_size = parse_int(row["world_size"], "world_size")
     num_alloc  = parse_int(row["num_allocated_cpu"], "num_allocated_cpu")
 
-    print(world_size)
-    print(num_alloc)
-    cpuset_csv = build_cpuset_and_limit(world_size, num_alloc)
+    # get current num of numa nodes
+    libnuma_found = util.find_spec("numa") is not None
+    if libnuma_found:
+        from numa import info
+        numa_size = info.get_num_configured_nodes()
+    else:
+        numa_size = 1
+
+    cpuset_csv = build_cpuset_and_limit(numa_size, num_alloc)
 
     yaml = YAML()
     yaml.preserve_quotes = True
