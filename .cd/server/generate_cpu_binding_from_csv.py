@@ -16,6 +16,12 @@ XSET_NAME    = "vllm_server_cpu" # x-sets key/anchor
 
 REQUIRED_COLUMNS = ["model_id", "input length", "output length", "world_size", "num_allocated_cpu"]
 
+from ruamel.yaml.comments import CommentedMap
+
+def as_cmap(d):
+    return d if isinstance(d, CommentedMap) else CommentedMap(d)
+
+
 def parse_int(v: str, name: str) -> int:
     try:
         return int(v)
@@ -71,16 +77,17 @@ def main():
     yaml.preserve_quotes = True
 
     root = CommentedMap()
-    root["version"] = args.compose_version
+    #root["version"] = args.compose_version
 
     # x-sets anchor
     xsets = CommentedMap()
     root["x-sets"] = xsets
     block = CommentedMap()
     block["cpuset"] = cpuset_csv
-    deploy = CommentedMap()
-    deploy["resources"] = {"limits": {"cpus": num_alloc}}
-    block["deploy"] = deploy
+    block["cpus"] = num_alloc
+    #deploy = CommentedMap()
+    #deploy["resources"] = {"limits": {"cpus": num_alloc}}
+    #block["deploy"] = deploy
     xsets[XSET_NAME] = block
     block.yaml_set_anchor(XSET_NAME, always_dump=True)
 
@@ -88,7 +95,15 @@ def main():
     services = CommentedMap()
     root["services"] = services
     merged = CommentedMap()
-    merged.yaml_set_merge([block])
+    #merged.yaml_set_merge([block])
+    base = as_cmap(block)
+    override = as_cmap(merged)
+
+    # ensure base gets an anchor so ruamel emits "<<: *id001"
+    base.yaml_set_anchor(None, always_dump=True)
+
+    # express the merge explicitly via the special key
+    override['<<'] = base
     services[SERVICE_NAME] = merged
 
     with open(args.output, "w") as f:
