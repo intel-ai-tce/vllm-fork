@@ -27,6 +27,7 @@ class CPU_Binding():
             cpus_allow_list = psutil.Process().cpu_affinity()
             numa_size = info.get_num_configured_nodes()
             cpu_count_per_numa = cpu_count // numa_size
+            allocated_cpu_per_numa = self.num_allocated_cpu // numa_size 
             #num_of_reserved_cpu = min(num_reserved_cpu,
             #                          cpu_count_per_numa // 2)
 
@@ -46,7 +47,7 @@ class CPU_Binding():
                     "Please try to bind threads manually.", world_size,
                     len(node_to_cpus))
             else:
-                start = cpu_count_per_numa - self.num_allocated_cpu
+                start = cpu_count_per_numa - allocated_cpu_per_numa
                 rank_to_cpus_list = node_to_cpus[self.rank][start:cpu_count_per_numa]
                 rank_to_cpus = ','.join(str(x) for x in rank_to_cpus_list)
                 print("rank %d auto thread-binding list: %s", self.rank, rank_to_cpus)
@@ -59,7 +60,7 @@ class CPU_Binding():
         return rank_to_cpus
 
 if __name__=="__main__":
-    num_allocated_cpu = 2
+    num_allocated_cpu = 18
     world_size = 2
     for i in range(world_size):
         cpu_binder = CPU_Binding(world_size, i, num_allocated_cpu)
