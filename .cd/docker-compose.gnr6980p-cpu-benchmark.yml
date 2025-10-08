@@ -32,5 +32,5 @@ services:
     command: ["/workspace/.buildkite/nightly-benchmarks/scripts/run-performance-benchmarks.sh"]
   benchmark:
     environment:
-      NUM_PROMPTS: 12800
+      NUM_PROMPTS: 64000
 
