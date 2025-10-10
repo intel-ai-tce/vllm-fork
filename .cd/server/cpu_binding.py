@@ -51,16 +51,19 @@ class CPU_Binding():
                 rank_to_cpus_list = node_to_cpus[self.rank][start:cpu_count_per_numa]
                 rank_to_cpus = ','.join(str(x) for x in rank_to_cpus_list)
                 print("rank %d auto thread-binding list: %s", self.rank, rank_to_cpus)
+                rank_to_idle_cpus_list = node_to_cpus[self.rank][:start]
+                rank_to_idle_cpus = ','.join(str(x) for x in rank_to_idle_cpus_list)
+                print("rank %d idle list: %s", self.rank, rank_to_idle_cpus)
         else:
             print(
                 "Auto thread-binding is not supported due to "
                 "the lack of package numa and psutil,"
                 "fallback to no thread-binding. To get better performance,"
                 "please try to manually bind threads.")
-        return rank_to_cpus
+        return rank_to_cpus, rank_to_idle_cpus
 
 if __name__=="__main__":
-    num_allocated_cpu = 18
+    num_allocated_cpu = 2
     libnuma_found = util.find_spec("numa") is not None
     if libnuma_found:
         from numa import info
@@ -69,5 +72,6 @@ if __name__=="__main__":
         numa_size = 1
     for i in range(numa_size):
         cpu_binder = CPU_Binding(numa_size, i, num_allocated_cpu)
-        rank_to_cpus = cpu_binder.get_cpus_id_binding_based_on_numa_nodes()
+        rank_to_cpus, rank_to_idle_cpus = cpu_binder.get_cpus_id_binding_based_on_numa_nodes()
         print(rank_to_cpus)
+        print(rank_to_idle_cpus)
