@@ -69,6 +69,21 @@ cd vllm-fork/.cd/
 
    This launches the vLLM server and runs the benchmark suite automatically.
 
+#### 2.1 (Optional) Running the Server with a Benchmark, and pinning CPU cores for memory access coherence
+
+   To improve memory access cohererence, pin the CPU with different CPU NUMA nodes by using an auto-generate docker-compose.override.yml file.
+
+   ```bash
+   cd vllm-fork/.cd/
+   MODEL="Qwen/Qwen2.5-14B-Instruct" \
+   HF_TOKEN="<your huggingface token>" \
+   DOCKER_IMAGE="vault.habana.ai/gaudi-docker/1.22.0/ubuntu22.04/habanalabs/vllm-installer-2.7.1:latest" \
+   python3 server/generate_cpu_binding_from_csv.py \
+    --settings server/cpu_binding.csv \
+    --output ./docker-compose.override.yml
+   docker compose --profile benchmark -f docker-compose.yml -f docker-compose.override.yml up
+   ```
+
 ### 3. Run the server using Docker Compose with custom parameters
 
    To override default settings, you can provide additional parameters when starting the server. This is a more advanced approach:
