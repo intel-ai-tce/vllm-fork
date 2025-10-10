@@ -1,6 +1,5 @@
-model_id,input length,output length,world_size,num_allocated_cpu
-meta-llama/Llama-3.1-405B,2048,2048,8,18
-meta-llama/Llama-3.1-8B-Instruct,256,512,2,16
-Qwen/Qwen3-14B,128,128,2,24
-mistralai/Mistral-7B-Instruct-v0.3,256,1024,3,20
+model_id,input_length,output_length,world_size,data_type,num_allocated_cpu
+meta-llama/Llama-3.1-405B-Instruct,2048,2048,8,bf16,18
+meta-llama/Llama-3.1-70B-Instruct,2048,2048,4,bf16,18
+meta-llama/Llama-3.1-8B-Instruct,2048,2048,bf16,18
 
