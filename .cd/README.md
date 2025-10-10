@@ -72,7 +72,7 @@ cd vllm-fork/.cd/
 #### 2.1 (Optional) Running the Server with a Benchmark, and pinning CPU cores for memory access coherence
 
    To improve memory access cohererence and release CPUs to other CPU only workloads like a vLLM serving with Llama3 8B,   
-   pin the CPU with different CPU NUMA nodes by using an auto-generate docker-compose.override.yml file.
+   pin the CPU cores based on different CPU NUMA nodes by using an auto-generate docker-compose.override.yml file.
 
    ```bash
    cd vllm-fork/.cd/
