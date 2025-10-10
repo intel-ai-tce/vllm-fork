@@ -34,24 +34,29 @@ def pick_row_by_parameters(rows: List[dict], model: str, input_tok: str, output_
 
 def build_cpuset_and_limit(world_size: int, num_alloc: int) -> Tuple[str, str]:
     cpus_list = ''
+    idle_cpus_list = ''
     for rank in range(world_size):
         #inst = CPU_Binding(world_size, rank, num_alloc)
         cpu_binder = CPU_Binding(world_size,rank, num_alloc)
-        rank_to_cpus = cpu_binder.get_cpus_id_binding_based_on_numa_nodes()
+        rank_to_cpus, rank_to_idle_cpus = cpu_binder.get_cpus_id_binding_based_on_numa_nodes()
         if cpus_list != '':
             cpus_list += ','
         cpus_list += rank_to_cpus
+        if idle_cpus_list != '':
+            idle_cpus_list += ','
+        idle_cpus_list += rank_to_idle_cpus
     print(cpus_list)
-    return cpus_list
+    print(idle_cpus_list)
+    return cpus_list, idle_cpus_list
 
 def main():
     ap = argparse.ArgumentParser(description="Generate override docker-compose YAML (x-sets) for single 'vllm-server'.")
     ap.add_argument("--settings", default="server/cpu_binding.csv", 
                     help="CSV with columns: model_id,input length,output length,world_size,num_allocated_cpu")
     ap.add_argument("--output", default="docker-compose.override.yml", help="Output compose YAML path")
+    ap.add_argument("--cpuservice", help="name of the docker service binding on idle CPUs")
     #ap.add_argument("--compose-version", default="3.9")
     args = ap.parse_args()
-
     model = os.environ.get("MODEL")
     if not model:
         raise RuntimeError("Set environment variable MODEL to a model_id in the CSV (e.g., export MODEL='meta-llama/Llama-3.1-8B-Instruct').")
@@ -77,7 +82,8 @@ def main():
     else:
         numa_size = 1
 
-    cpuset_csv = build_cpuset_and_limit(numa_size, num_alloc)
+    cpuset_csv, idle_cpuset_csv = build_cpuset_and_limit(numa_size, num_alloc)
+    num_idle_cpus = len(idle_cpuset_csv.split(","))
 
     yaml = YAML()
     yaml.preserve_quotes = True
@@ -91,6 +97,14 @@ def main():
     vllm_server["cpus"]   = DoubleQuotedScalarString(str(num_alloc))
 
     services[SERVICE_NAME] = vllm_server    
+
+    # optional cpuservice: allocate remaining idle CPUs
+    if args.cpuservice and args.cpuservice.strip():
+        cpuservice = CommentedMap()
+        cpuservice["cpuset"] = DoubleQuotedScalarString(idle_cpuset_csv)
+        cpuservice["cpus"]   = DoubleQuotedScalarString(str(num_idle_cpus))
+        services[args.cpuservice.strip()] = cpuservice
+
 
     with open(args.output, "w") as f:
         yaml.dump(root, f)
