@@ -83,6 +83,19 @@ cd vllm-fork/.cd/
    docker compose --profile benchmark -f docker-compose.yml -f docker-compose.override.yml up
    ```
 
+   To also pin idle CPUs to another service like vllm-cpu-service, please give the service name to update  
+   docker-compose.override.yml in order to bind another service to idle cpus.  
+   Here is an exmaple to bind idle cpu for vllm-cpu-service service while docker-compose.vllm-cpu-service.yml defines cpu service.  
+   
+   ```bash
+   cd vllm-fork/.cd/
+   MODEL="Qwen/Qwen2.5-14B-Instruct" \
+   HF_TOKEN="<your huggingface token>" \
+   DOCKER_IMAGE="vault.habana.ai/gaudi-docker/1.22.0/ubuntu22.04/habanalabs/vllm-installer-2.7.1:latest" \
+   python3 server/generate_cpu_binding_from_csv.py --settings server/cpu_binding.csv --output ./docker-compose.override.yml --cpuservice vllm-cpu-service \
+   docker compose --profile benchmark -f docker-compose.yml -f docker-compose.vllm-cpu-service.yml -f docker-compose.override.yml up
+   ```
+
 ### 3. Run the server using Docker Compose with custom parameters
 
    To override default settings, you can provide additional parameters when starting the server. This is a more advanced approach:
