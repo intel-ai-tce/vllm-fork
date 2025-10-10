@@ -78,9 +78,7 @@ cd vllm-fork/.cd/
    MODEL="Qwen/Qwen2.5-14B-Instruct" \
    HF_TOKEN="<your huggingface token>" \
    DOCKER_IMAGE="vault.habana.ai/gaudi-docker/1.22.0/ubuntu22.04/habanalabs/vllm-installer-2.7.1:latest" \
-   python3 server/generate_cpu_binding_from_csv.py \
-    --settings server/cpu_binding.csv \
-    --output ./docker-compose.override.yml
+   python3 server/generate_cpu_binding_from_csv.py --settings server/cpu_binding.csv --output ./docker-compose.override.yml \
    docker compose --profile benchmark -f docker-compose.yml -f docker-compose.override.yml up
    ```
 

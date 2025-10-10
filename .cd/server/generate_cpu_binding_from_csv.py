@@ -15,7 +15,7 @@ from importlib import util
 SERVICE_NAME = "vllm-server"     # single service
 XSET_NAME    = "vllm_server_cpu" # x-sets key/anchor
 
-REQUIRED_COLUMNS = ["model_id", "input length", "output length", "world_size", "num_allocated_cpu"]
+REQUIRED_COLUMNS = ["model_id", "input_length", "output_length", "world_size", "data_type", "cpu_model","num_allocated_cpu"]
 
 from ruamel.yaml.comments import CommentedMap
 
