@@ -15,7 +15,7 @@ from importlib import util
 SERVICE_NAME = "vllm-server"     # single service
 XSET_NAME    = "vllm_server_cpu" # x-sets key/anchor
 
-REQUIRED_COLUMNS = ["model_id", "input_length", "output_length", "world_size", "data_type", "cpu_model","num_allocated_cpu"]
+REQUIRED_COLUMNS = ["model_id", "input_length", "output_length", "world_size", "data_type","num_allocated_cpu"]
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -46,10 +46,10 @@ def build_cpuset_and_limit(world_size: int, num_alloc: int) -> Tuple[str, str]:
 
 def main():
     ap = argparse.ArgumentParser(description="Generate override docker-compose YAML (x-sets) for single 'vllm-server'.")
-    ap.add_argument("--settings", required=True,
+    ap.add_argument("--settings", default="server/cpu_binding.csv", 
                     help="CSV with columns: model_id,input length,output length,world_size,num_allocated_cpu")
-    ap.add_argument("--output", required=True, help="Output compose YAML path")
-    ap.add_argument("--compose-version", default="3.9")
+    ap.add_argument("--output", default="docker-compose.override.yml", help="Output compose YAML path")
+    #ap.add_argument("--compose-version", default="3.9")
     args = ap.parse_args()
 
     model = os.environ.get("MODEL")
