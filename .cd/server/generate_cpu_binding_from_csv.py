@@ -25,7 +25,7 @@ def parse_int(v: str, name: str) -> int:
     except Exception:
         raise ValueError(f"Invalid integer for {name!r}: {v!r}")
 
-def pick_row_by_model(rows: List[dict], model: str) -> dict:
+def pick_row_by_parameters(rows: List[dict], model: str, input_tok: str, output_tok: str, con_req: str) -> dict:
     matches = [r for r in rows if r.get("model_id", "").strip() == model]
     if not matches:
         available = ", ".join(sorted({r.get('model_id','') for r in rows}))
@@ -55,6 +55,9 @@ def main():
     model = os.environ.get("MODEL")
     if not model:
         raise RuntimeError("Set environment variable MODEL to a model_id in the CSV (e.g., export MODEL='meta-llama/Llama-3.1-8B-Instruct').")
+    input_tok = os.environ.get("INPUT_TOK")
+    output_tok = os.environ.get("OUTPUT_TOK")
+    con_req = os.environ.get("CONCURRENT_REQ")
 
     with open(args.settings, newline="") as f:
         rows = list(csv.DictReader(f))
@@ -62,7 +65,7 @@ def main():
         found = list(rows[0].keys()) if rows else "EMPTY CSV"
         raise ValueError(f"CSV missing required headers {REQUIRED_COLUMNS}. Found: {found}")
 
-    row = pick_row_by_model(rows, model)
+    row = pick_row_by_parameters(rows, model, input_tok, output_tok, con_req)
     world_size = parse_int(row["world_size"], "world_size")
     num_alloc  = parse_int(row["num_allocated_cpu"], "num_allocated_cpu")
 
