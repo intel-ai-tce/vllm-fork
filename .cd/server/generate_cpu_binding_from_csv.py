@@ -7,7 +7,7 @@ from typing import List, Tuple
 # Requires: pip install ruamel.yaml
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-
+from ruamel.yaml.scalarstring import DoubleQuotedScalarString
 # Import CPU_Binding directly from sibling cpu_binding.py
 from cpu_binding import CPU_Binding
 from importlib import util
@@ -18,10 +18,6 @@ XSET_NAME    = "vllm_server_cpu" # x-sets key/anchor
 REQUIRED_COLUMNS = ["model_id", "input_length", "output_length", "world_size", "data_type", "cpu_model","num_allocated_cpu"]
 
 from ruamel.yaml.comments import CommentedMap
-
-def as_cmap(d):
-    return d if isinstance(d, CommentedMap) else CommentedMap(d)
-
 
 def parse_int(v: str, name: str) -> int:
     try:
@@ -84,34 +80,14 @@ def main():
     yaml.preserve_quotes = True
 
     root = CommentedMap()
-    #root["version"] = args.compose_version
 
-    # x-sets anchor
-    xsets = CommentedMap()
-    root["x-sets"] = xsets
-    block = CommentedMap()
-    block["cpuset"] = cpuset_csv
-    block["cpus"] = num_alloc
-    #deploy = CommentedMap()
-    #deploy["resources"] = {"limits": {"cpus": num_alloc}}
-    #block["deploy"] = deploy
-    xsets[XSET_NAME] = block
-    block.yaml_set_anchor(XSET_NAME, always_dump=True)
-
-    # single service merging the x-sets block
     services = CommentedMap()
     root["services"] = services
-    merged = CommentedMap()
-    #merged.yaml_set_merge([block])
-    base = as_cmap(block)
-    override = as_cmap(merged)
+    vllm_server = CommentedMap()
+    vllm_server["cpuset"] = DoubleQuotedScalarString(cpuset_csv)
+    vllm_server["cpus"]   = DoubleQuotedScalarString(str(num_alloc))
 
-    # ensure base gets an anchor so ruamel emits "<<: *id001"
-    base.yaml_set_anchor(None, always_dump=True)
-
-    # express the merge explicitly via the special key
-    override['<<'] = base
-    services[SERVICE_NAME] = merged
+    services[SERVICE_NAME] = vllm_server    
 
     with open(args.output, "w") as f:
         yaml.dump(root, f)
