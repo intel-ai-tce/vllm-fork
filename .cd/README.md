@@ -133,7 +133,7 @@ cd vllm-fork/.cd/
 
    - `INPUT_TOK` – Number of input tokens per prompt.
    - `OUTPUT_TOK` – Number of output tokens to generate per prompt.
-   - `CON_REQ` – Number of concurrent requests to send during benchmarking.
+   - `CONCURRENT_REQ` – Number of concurrent requests to send during benchmarking.
    - `NUM_PROMPTS` – Total number of prompts to use in the benchmark.
 
    **Example usage:**
@@ -145,7 +145,7 @@ cd vllm-fork/.cd/
    DOCKER_IMAGE="vault.habana.ai/gaudi-docker/1.22.0/ubuntu22.04/habanalabs/vllm-installer-2.7.1:latest" \
    INPUT_TOK=128 \
    OUTPUT_TOK=128 \
-   CON_REQ=16 \
+   CONCURRENT_REQ=16 \
    NUM_PROMPTS=64 \
    docker compose --profile benchmark up
    ```
@@ -167,7 +167,7 @@ cd vllm-fork/.cd/
    MAX_MODEL_LEN=2048 \
    INPUT_TOK=128 \
    OUTPUT_TOK=128 \
-   CON_REQ=16 \
+   CONCURRENT_REQ=16 \
    NUM_PROMPTS=64 \
    docker compose --profile benchmark up
    ```
