@@ -68,22 +68,6 @@ cd vllm-fork/.cd/
    ```
 
    This launches the vLLM server and runs the benchmark suite automatically.
-#### 2.1 Running the Server with a Benchmark on both Gaudi and CPU
-
-   To easily initiate benchmark dedicated for a specific model using default parameters, use the `--profile benchmark up` option with Docker Compose:
-
-   ```bash
-   git clone https://github.com/vllm-project/vllm
-   export VLLM_FOLDER_PATH=$(pwd)
-   cd vllm-fork/.cd/
-   MODEL="Qwen/Qwen2.5-14B-Instruct" \
-   HF_TOKEN="<your huggingface token>" \
-   DOCKER_IMAGE="vault.habana.ai/gaudi-docker/1.22.0/ubuntu22.04/habanalabs/vllm-installer-2.7.1:latest" \
-   docker compose --profile benchmark -f docker-compose.yml -f docker-compose.gnr6980p.yml -f docker-compose.gnr6980p-cpu-benchmark.yml up
-   ```
-
-   This launches the vLLM server and runs the benchmark suite automatically.
-
 
 #### 2.1 (Optional) Running the Server with a Benchmark, and pinning CPU cores for memory access coherence
 
@@ -100,20 +84,26 @@ cd vllm-fork/.cd/
    HF_TOKEN="<your huggingface token>" \
    DOCKER_IMAGE="vault.habana.ai/gaudi-docker/1.22.0/ubuntu22.04/habanalabs/vllm-installer-2.7.1:latest" \
    python3 server/generate_cpu_binding_from_csv.py --settings server/cpu_binding.csv --output ./docker-compose.override.yml \
-   docker compose --profile benchmark -f docker-compose.yml -f docker-compose.override.yml up
+   docker compose -f docker-compose.yml --profile benchmark  -f docker-compose.override.yml up
    ```
 
    To also pin idle CPUs to another service like vllm-cpu-service, please give the service name to update  
    docker-compose.override.yml in order to bind another service to idle cpus.  
-   Here is an exmaple to bind idle cpu for vllm-cpu-service service while docker-compose.vllm-cpu-service.yml defines cpu service.  
-   
+   Here is an exmaple to bind idle cpu for vllm-ci-test service while docker-compose.cpu-benchmark.yml defines cpu service.  
+   First, users need to get the vLLM Benchmark Suite from v0.10.1 release since vllm-ci-test service uses v0.10.1 release docker image.  
+    ```bash
+   git clone https://github.com/vllm-project/vllm.git
+   git checkout release/v0.10.1
+   export VLLM_FOLDER_PATH="$(pwd)"
+   ```
+   Second, users can start running gaudi and cpu vllm service together with CPU pinning using below commands.  
    ```bash
    cd vllm-fork/.cd/
    MODEL="Qwen/Qwen2.5-14B-Instruct" \
    HF_TOKEN="<your huggingface token>" \
    DOCKER_IMAGE="vault.habana.ai/gaudi-docker/1.22.0/ubuntu22.04/habanalabs/vllm-installer-2.7.1:latest" \
-   python3 server/generate_cpu_binding_from_csv.py --settings server/cpu_binding.csv --output ./docker-compose.override.yml --cpuservice vllm-cpu-service \
-   docker compose --profile benchmark -f docker-compose.yml -f docker-compose.vllm-cpu-service.yml -f docker-compose.override.yml up
+   python3 server/generate_cpu_binding_from_csv.py --settings server/cpu_binding.csv --output ./docker-compose.override.yml --cpuservice vllm-ci-test \
+   docker compose -f docker-compose.yml --profile benchmark -f docker-compose.cpu-benchmark.yml -f docker-compose.override.yml up
    ```
 
 ### 3. Run the server using Docker Compose with custom parameters
