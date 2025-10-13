@@ -90,13 +90,17 @@ cd vllm-fork/.cd/
    To also pin idle CPUs to another service like vllm-cpu-service, please give the service name to update  
    docker-compose.override.yml in order to bind another service to idle cpus.  
    Here is an exmaple to bind idle cpu for vllm-ci-test service while docker-compose.cpu-benchmark.yml defines cpu service.  
+   
    First, users need to get the vLLM Benchmark Suite from v0.10.1 release since vllm-ci-test service uses v0.10.1 release docker image.  
-    ```bash
+   
+   ```bash
    git clone https://github.com/vllm-project/vllm.git
    git checkout release/v0.10.1
    export VLLM_FOLDER_PATH="$(pwd)"
    ```
-   Second, users can start running gaudi and cpu vllm service together with CPU pinning using below commands.  
+
+   Second, users can start running gaudi and cpu vllm service together with CPU pinning using below commands.
+
    ```bash
    cd vllm-fork/.cd/
    MODEL="Qwen/Qwen2.5-14B-Instruct" \
